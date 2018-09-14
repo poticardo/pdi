@@ -1,0 +1,757 @@
+= Digital image processing
+:toc: left
+:source-highlighter: highlightjs
+
+First part of the digital image processing course
+
+Hi! I' am Pedro Henrique Braga Moraes and this work is a part of the digital image processing course ministered by professor Agostinho de Medeiros Brito, at UFRN. Here you will find a lot of OpenCV and jojo's references.
+
+== 1. Manipulating pixels in an image
+
+=== 1.1. Negative
+
+This first program basicaly asks the cordinates from the user and take the negative of the rectangular region. The algorithm converts the image to grayscale and for each pixel in the region it makes 255 - (value of the pixel).
+
+:imagesdir: /home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images
+
+Berserk.jpg before negative:
+
+.Guts before negative:
+image::berserk.jpg[]
+
+Berserk.jpg after negative:
+
+.Guts after negative:
+image::negativo.jpg[]
+
+[source,C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+
+
+int main(int, char**){
+  int X1, X2, Y1, Y2;
+  Mat image;
+  Vec3b val;
+  
+  do{
+  cout<<"Digite o valor de X1:  ";
+  cin >> X1;
+  cout << endl;
+  if (X1>960 || X1<0)
+    cout << "Numero fora da faixa! Digite outro! ";
+    cout << endl;}
+  while (X1>960 || X1<0);
+  
+  do{
+  cout<<"Digite o valor de X2:  ";
+  cin >> X2;
+  cout << endl;
+  if (X2>960 || X2<0)
+    cout << "Numero fora da faixa! Digite outro! ";
+    cout << endl;}
+  while (X2>960 || X2<0);
+
+
+  do{
+  cout<<"Digite o valor de Y1:  ";
+  cin >> Y1;
+  cout << endl;
+  if (Y1>540 || Y1<0)
+    cout << "Numero fora da faixa! Digite outro! ";
+    cout << endl;}
+  while (Y1>540 || Y1<0);
+
+
+  do{
+  cout<<"digite o valor de Y2:  ";
+  cin >> Y2;
+  cout << endl;
+  if (Y2>540 || Y2<0)
+    cout << "Numero fora da faixa! Digite outro! ";
+    cout << endl;}
+  while (Y2>540 || Y2<0);
+
+
+  image= imread("berserk.jpg",CV_LOAD_IMAGE_GRAYSCALE);
+  if(!image.data)
+    cout << "nao abriu berserk.jpg" << endl;
+
+  namedWindow("janela",WINDOW_AUTOSIZE);
+
+  for(int j=X1;j<X2;j++){ // eixo x e y invertidos, y é o eixo horizontal e x o vertical
+    for(int i=Y1;i<Y2;i++){
+       image.at<uchar>(i, j) =  255 - image.at<uchar>(i, j);
+    }
+  }
+
+  imshow("janela", image);
+  //imwrite("negativo.jpg", image);
+
+  waitKey();
+  return 0;
+}
+----
+
+=== 1.2. Swapping regions
+
+This code divides the image in 4 quadrants and swaps the regions. 
+
+mononoke.jpg before swap:
+
+.Mononoke Hime before swap
+image::mononoke.jpg[]
+
+mononoke.jpg after swap:
+
+.Mononoke Hime after swap
+image::trocada.jpg[]
+
+[source,C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+
+
+int main(int, char**){
+  
+  Mat image;
+  image = imread("mononoke.jpg");
+  int r = image.rows;
+  int mr = image.rows/2;
+  int c = image.cols;
+  int mc = image.cols/2;
+  Mat vazia = Mat::zeros(r, c, CV_8UC3);
+  if(!image.data)
+    cout << "nao abriu a imagem!" << endl;
+
+  namedWindow("trocada", WINDOW_AUTOSIZE);
+
+  for(int j=0;j<c;j++){ 
+    for(int i=0;i<r;i++)
+    	
+      { 
+         if(i < mr && j < mc)  
+            vazia.at<Vec3b>(i, j) =  image.at<Vec3b>(i+mr, j+mc);          
+         if(i > mr && j > mc)
+         	vazia.at<Vec3b>(i, j) =  image.at<Vec3b>(i-mr, j-mc);
+         if(i > mr && j < mc)
+         	vazia.at<Vec3b>(i, j) =  image.at<Vec3b>(i-mr, j+mc);
+         if(i < mr && j > mc)
+         	vazia.at<Vec3b>(i, j) =  image.at<Vec3b>(i+mr, j-mc);             
+      }  
+       
+  }
+  
+  imshow("trocada", vazia);
+  imwrite("trocada.jpg", vazia);
+
+  waitKey();
+  return 0;
+}
+----
+== 2. Objects couting
+
+=== 2.1. Labeling
+
+This program counts the objects in the image, differentiating the ones with and without holes.
+
+First we have the image:
+
+.bolhas.png
+image::bolhas.png[]
+
+[source,C++]
+----
+
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+  Mat image, mask;
+  int c, r, total = 0, hole = 0;
+  
+  
+  CvPoint p;
+  image = imread(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
+  
+  if(!image.data){
+    std::cout << "imagem nao carregou corretamente\n";
+    return(-1);
+  }
+  c=image.cols;
+  r=image.rows;
+
+  p.x=0;
+  p.y=0;
+
+  
+  
+  for(int i=0; i<r; i++){
+    for(int j=0; j<c; j++){
+      if(image.at<uchar>(i,j) == 255){
+		
+		if(i == 0 || j == 0 || i == (r-1) || j == (c-1) ){
+		p.x=j;
+		p.y=i;
+		floodFill(image,p, 0);}
+	  }
+	}
+  }
+
+  p.x = 0;
+  p.y = 0;
+  floodFill(image, p, 200);
+
+  for(int i=0; i<r; i++){
+    for(int j=0; j<c; j++){
+      if(image.at<uchar>(i,j) == 255){
+        p.x=j;
+        p.y=i;
+        total++;
+        //colour1++;
+        floodFill(image, p, 30);
+ }}}
+
+ imshow("image", image);
+ imwrite("bolhas1.png", image);
+   waitKey();
+  for(int i=0; i<r; i++){
+    for(int j=0; j<c; j++){
+      if(image.at<uchar>(i,j) == 0){
+        if(image.at<uchar>(i-1,j) != 200){
+          hole++;
+          p.x=j;
+          p.y=i;
+          floodFill(image, p, 200);
+          p.x=j;
+          p.y=i-1;
+          floodFill(image, p, 200);}
+        else
+          p.x=j;
+          p.y=i;
+          floodFill(image,p, 200);
+        
+        
+        
+          }}}
+       
+        
+  
+  imshow("image", image);
+  imwrite("labeling.png", image);
+  cout << "total objects: " << total <<endl;
+  cout << "total hole objects: " << hole <<endl;
+  cout << "total sem hole objects: " << total - hole <<endl;
+  waitKey();
+  return 0;
+}
+----
+ 
+After running the program, the first thing that happens is deleting the objects that touch the boarder:
+
+.bolhas.png after deleting the objects that touch the boarder
+image::bolhas1.png[]
+
+Then the counting can happen:
+
+.bolhas.png after labeling
+image::labeling.png[]
+
+Results:
+
+.Total number of bubbles in image
+image::n.png[]
+
+It's worth poiting out that this programs works also with images that have objects with two or more holes.
+
+== 3. Histograms
+
+=== 3.1. Equalize image
+
+The algorithm below equilizes and shows the image's histogram.
+
+Original image:
+
+.Joseph Joestar saying nice
+image::nice.jpg[]
+
+[source,C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+Mat img, img_eq, hist, hist_eq;
+int nbins = 64;
+
+float range[] = {0, 256};
+const float *histrange = { range };
+
+img= imread("nice.jpg",CV_LOAD_IMAGE_GRAYSCALE);
+  if(!img.data)
+    cout << "nao abriu nice.jpg" << endl;
+
+equalizeHist( img, img_eq );
+
+
+bool uniform = true;
+bool acummulate = false;
+
+int histw = nbins, histh = nbins / 2;
+Mat hist_img(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+Mat hist_img_eq(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+
+calcHist(&img, 1, 0, Mat(), hist, 1, &nbins, &histrange, uniform, acummulate);
+calcHist(&img_eq, 1, 0, Mat(), hist_eq, 1, &nbins, &histrange, uniform, acummulate);
+
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+normalize(hist_eq, hist_eq, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+hist_img.setTo(Scalar(0));
+hist_img_eq.setTo(Scalar(0));
+
+for(int i=0; i<nbins; i++){
+  line(hist_img, Point(i, histh), Point(i, 32 - cvRound(hist.at<float>(i))), Scalar(255, 255, 255), 1, 8, 0);
+  line(hist_img_eq, Point(i, histh), Point(i, 32 - cvRound(hist_eq.at<float>(i))), Scalar(255, 255, 255), 1, 8, 0);}
+
+hist_img.copyTo(img(Rect(15, 15, nbins, histh)));
+hist_img_eq.copyTo(img_eq(Rect(15, 15, nbins, histh)));
+
+
+
+
+namedWindow("nice",WINDOW_AUTOSIZE);
+namedWindow("equilised_nice",WINDOW_AUTOSIZE);
+
+
+
+imshow( "nice", img );
+imshow( "equalised_nice", img_eq );
+imwrite("nice_hist.jpg", img);
+imwrite("nice_equilised_hist.jpg", img_eq);
+
+waitKey();
+return 0;}
+
+----
+
+The output, jojo and the histogram:
+
+.Joseph Joestar saying nice's histogram
+image::nice_hist.jpg[]
+
+Jojo and the equalized histogram:
+
+.Joseph Joestar sayng nice's histogram after equalisation
+image::nice_equilised_hist.jpg[]
+
+=== 3.2. Equilize video
+
+The same process, but now with a video of an amazing spear fight:
+
+.Spear fight:
+video::barca.mp4[]
+
+[source,C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+Mat img, img_eq, hist, hist_eq;
+int nbins = 64;
+
+float range[] = {0, 256};
+const float *histrange = { range };
+
+VideoCapture cap("barca.mp4"); 
+  if(!cap.isOpened()){
+    cout << "Erro abrindo o video!" <<endl;
+    return -1;
+  }
+int width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+int height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+//VideoWriter video1("barca.avi",CV_FOURCC('P','I','M','1'),30, Size(width, height),0);
+//VideoWriter video2("barca_eq.avi",CV_FOURCC('P','I','M','1'),30, Size(width, height),0);
+while(1){
+    cap >> img;
+    if (img.empty()) 
+     	break;
+cvtColor(img, img, CV_BGR2GRAY);   
+equalizeHist( img, img_eq );
+
+
+bool uniform = true;
+bool acummulate = false;
+
+int histw = nbins, histh = nbins / 2;
+Mat hist_img(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+Mat hist_img_eq(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+
+calcHist(&img, 1, 0, Mat(), hist, 1, &nbins, &histrange, uniform, acummulate);
+calcHist(&img_eq, 1, 0, Mat(), hist_eq, 1, &nbins, &histrange, uniform, acummulate);
+
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+normalize(hist_eq, hist_eq, 0, hist_img_eq.rows, NORM_MINMAX, -1, Mat());
+
+hist_img.setTo(Scalar(0));
+hist_img_eq.setTo(Scalar(0));
+
+for(int i=0; i<nbins; i++){
+  line(hist_img, Point(i, histh), Point(i, 32 - cvRound(hist.at<float>(i))), Scalar(255, 255, 255), 1, 8, 0);
+  line(hist_img_eq, Point(i, histh), Point(i, 32 - cvRound(hist_eq.at<float>(i))), Scalar(255, 255, 255), 1, 8, 0);}
+
+hist_img.copyTo(img(Rect(15, 15, nbins, histh)));
+hist_img_eq.copyTo(img_eq(Rect(15, 15, nbins, histh)));
+
+
+
+
+
+//video1.write(img);
+//video2.write(img_eq);
+namedWindow("nice",WINDOW_AUTOSIZE);
+namedWindow("equilised_video",WINDOW_AUTOSIZE);
+
+
+if (img.empty()) 
+     	break;
+
+imshow( "video", img );
+imshow( "equalised_video", img_eq );
+if(waitKey(30) >= 0) 
+    	break;
+}
+cap.release();
+destroyAllWindows();
+
+
+waitKey();
+return 0;}
+
+----
+
+The output:
+
+.Spear fight with histogram:
+video::barca_hist.mp4[] 
+
+
+.Spear fight with histogram after equalization:
+video::barca_eq_hist.mp4[]
+
+=== 3.3. Motion detection
+
+This programs alerts Iggy when Petshop arrives, it detects the drastic changes in the pixels. Take care of yourself Iggy, you have to help defeat Dio!
+ 
+The input:
+
+.Iggy vs. Petshop:
+video::petshop.mp4[]
+
+[source,C++]
+----
+#include <iostream>
+#include <cmath>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+Mat frame, img,  hist, frame_hist;
+int nbins = 64;
+double compara;
+float range[] = {0, 256};
+const float *histrange = { range };
+
+bool uniform = true;
+bool acummulate = false;
+
+VideoCapture cap("petshop.mp4"); 
+  if(!cap.isOpened()){
+    cout << "Erro abrindo o video!" <<endl;
+    return -1;
+  }
+
+int histw = nbins, histh = nbins / 2;
+Mat hist_img(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+
+cap >> frame;
+
+cvtColor(frame, frame, CV_BGR2GRAY); 
+calcHist(&frame, 1, 0, Mat(), frame_hist, 1, &nbins, &histrange, uniform, acummulate);
+normalize(frame_hist, frame_hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+while(1){
+
+cap >> img;
+
+if (!img.data) 
+     	break;
+cvtColor(img, img, CV_BGR2GRAY);   
+calcHist(&img, 1, 0, Mat(), hist, 1, &nbins, &histrange, uniform, acummulate);
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+compara = compareHist(hist, frame_hist, CV_COMP_CORREL);
+		if (compara < 0.90) 
+			cout << "Surpresa Iggy!" << endl;
+
+cap >> frame;
+
+cvtColor(frame, frame, CV_BGR2GRAY); 
+calcHist(&frame, 1, 0, Mat(), frame_hist, 1, &nbins, &histrange, uniform, acummulate);
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+namedWindow("compara",WINDOW_AUTOSIZE);
+
+
+
+imshow( "compara", img );
+
+if(waitKey(30) >= 0) 
+    	break;
+}
+cap.release();
+destroyAllWindows();
+
+
+waitKey(0);
+return 0;}
+
+----
+
+Output: 
+ 
+.Output before Iggy get a fright
+image::iggy1.png[]
+
+image::iggy2.png[]
+.Output after Iggy get a fright
+image::iggy3.png[]
+
+It's important to say that a compression happens in this process, since we are processing two frames in each loop.
+
+== 4. Spacial-domain filtering I
+
+=== 4.1. Different kinds of filtering
+
+After running the code, the image is filtered with differents kernels, we can see it bellow.
+
+Original image:
+
+.Kaori before spatial filtering 
+image::Kaori_Miyazono.png[]
+
+Grayscale:
+
+.Grayscale Kaori
+image::grayscale.jpg[]
+
+[source,C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
+using namespace std;
+
+void printmask(Mat &m) {
+	for (int i = 0; i < m.size().height; i++) {
+		for (int j = 0; j < m.size().width; j++) {
+			cout << m.at<float>(i, j) << ",";
+		}
+		cout << endl;
+	}
+}
+
+void menu() {
+	cout << "\npressione a tecla para ativar o filtro: \n"
+		"a - calcular modulo\n"
+		"m - media\n"
+		"g - gauss\n"
+		"v - vertical\n"
+		"h - horizontal\n"
+		"l - laplaciano\n"
+		"p - laplgauss\n"
+		"esc - sair\n";
+}
+
+int main(int argvc, char** argv) {
+	
+	float media[] = { 1,1,1,
+		1,1,1,
+		1,1,1 };
+	float gauss[] = { 1,2,1,
+		2,4,2,
+		1,2,1 };
+	float vertical[] = { -1,0,1,
+		-2,0,2,
+		-1,0,1 };
+	float horizontal[] = { -1,-2,-1,
+		0,0,0,
+		1,2,1 };
+	float laplacian[] = { 0,-1,0,
+		-1,4,-1,
+		0,-1,0 };
+	
+	float laplgauss[] = {0,0,1,0,0,
+		 0,1,2,1,0,
+		1,2,-16,2,1,
+		 0,1,2,1,0,
+		 0,0,1,0,0};
+	Mat img = imread("Kaori_Miyazono.png");
+	if(!img.data)
+    cout << "nao abriu bolhas.png" << endl;
+	Mat  frame, frame32f, frameFiltered;
+	Mat mask(3, 3, CV_32F), mask1;
+	Mat result, result1;
+	double width, height;
+	int absolut;
+	char key;
+
+	width = img.cols;
+	height = img.rows;
+	std::cout << "largura=" << width << "\n";;
+	std::cout << "altura =" << height << "\n";;
+
+	namedWindow("filtroespacial", 1);
+
+	mask = Mat(3, 3, CV_32F, media);
+	scaleAdd(mask, 1 / 9.0, Mat::zeros(3, 3, CV_32F), mask1);
+	swap(mask, mask1);
+	absolut = 1; 
+	menu();
+	for (;;) {
+		cvtColor(img, frame, CV_BGR2GRAY);
+		flip(frame, frame, 1);
+		imshow("original", frame);
+
+		frame.convertTo(frame32f, CV_32F);
+		//imwrite("grayscale.jpg", frame);
+		filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1, 1), 0);
+		if (absolut) {
+			frameFiltered = abs(frameFiltered);
+		}
+		frameFiltered.convertTo(result, CV_8U);
+		imshow("filtroespacial", result);
+		key = (char)waitKey(10);
+		if (key == 27) break; 
+		switch (key) {
+		case 'a':
+			menu();
+			absolut = !absolut;
+			break;
+		case 'm':
+			menu();
+			mask = Mat(3, 3, CV_32F, media);
+			scaleAdd(mask, 1 / 9.0, Mat::zeros(3, 3, CV_32F), mask1);
+			mask = mask1;
+			printmask(mask);
+			//imwrite("media.jpg", frameFiltered);
+			break;
+		case 'g':
+			menu();
+			mask = Mat(3, 3, CV_32F, gauss);
+			scaleAdd(mask, 1 / 16.0, Mat::zeros(3, 3, CV_32F), mask1);
+			mask = mask1;
+			printmask(mask);
+			//imwrite("gauss.jpg", frameFiltered);
+			break;
+		case 'h':
+			menu();
+			mask = Mat(3, 3, CV_32F, horizontal);
+			printmask(mask);
+			//imwrite("horizontal.jpg", frameFiltered);
+			break;
+		case 'v':
+			menu();
+			mask = Mat(3, 3, CV_32F, vertical);
+			printmask(mask);
+			//imwrite("vertical.jpg", frameFiltered);
+			break;
+		case 'l':
+			menu();
+			mask = Mat(3, 3, CV_32F, laplacian);
+			printmask(mask);
+			//imwrite("laplaciano.jpg", frameFiltered);
+			break;
+			
+		case 'p':
+			menu();
+			mask = Mat(5, 5, CV_32F, laplgauss);
+			printmask(mask);
+			//imwrite("laplaciano_gaussiano.jpg", frameFiltered);
+			break;
+		default:
+			break;
+		}
+	}
+	return 0;
+}
+
+----
+
+Gauss:
+
+.Kaori after gaussian filtering
+image::gauss.jpg[]
+
+Media:
+
+.Kaori after media filtering
+image::media.jpg[]
+
+Horizontal:
+
+.Kaori after horizontal filtering
+image::horizontal.jpg[]
+
+Vertical:
+
+.Kaori after vertical filtering
+image::vertical.jpg[]
+
+Laplacian:
+
+.Kaori after laplacian filtering
+image::laplaciano.jpg[]
+
+Laplacian + Gaussian:
+
+.Kaori after Gaussian + Laplacian filtering
+image::laplaciano_gaussiano.jpg[]
+
+We can see that using Laplacian + Gaussian filtering, the contours are now more well defined.
+
+== 5. Spacial-domain filtering II
+
+=== 5.1. Tiltshift
+
+
+
+
+
+
