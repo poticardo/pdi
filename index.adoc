@@ -12,7 +12,7 @@ Hi! I' am Pedro Henrique Braga Moraes and this work is a part of the digital ima
 
 This first program basicaly asks the cordinates from the user and take the negative of the rectangular region. The algorithm converts the image to grayscale and for each pixel in the region it makes 255 - (value of the pixel).
 
-:imagesdir: /home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images
+:imagesdir: images/
 
 Berserk.jpg before negative:
 
