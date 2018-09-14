@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.7.1">
-<title>Processamento digital de imagens</title>
+<title>Digital image processing</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
@@ -430,28 +430,942 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 @media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
 </style>
 </head>
-<body class="article">
+<body class="article toc2 toc-left">
 <div id="header">
-<h1>Processamento digital de imagens</h1>
+<h1>Digital image processing</h1>
+<div id="toc" class="toc2">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_1_manipulating_pixels_in_an_image">1. Manipulating pixels in an image</a>
+<ul class="sectlevel2">
+<li><a href="#_1_1_negative">1.1. Negative</a></li>
+<li><a href="#_1_2_swapping_regions">1.2. Swapping regions</a></li>
+</ul>
+</li>
+<li><a href="#_2_objects_couting">2. Objects couting</a>
+<ul class="sectlevel2">
+<li><a href="#_2_1_labeling">2.1. Labeling</a></li>
+</ul>
+</li>
+<li><a href="#_3_histograms">3. Histograms</a>
+<ul class="sectlevel2">
+<li><a href="#_3_1_equalize_image">3.1. Equalize image</a></li>
+<li><a href="#_3_2_equilize_video">3.2. Equilize video</a></li>
+<li><a href="#_3_3_motion_detection">3.3. Motion detection</a></li>
+</ul>
+</li>
+<li><a href="#_4_spacial_domain_filtering_i">4. Spacial-domain filtering I</a>
+<ul class="sectlevel2">
+<li><a href="#_4_1_different_kinds_of_filtering">4.1. Different kinds of filtering</a></li>
+</ul>
+</li>
+<li><a href="#_5_spacial_domain_filtering_ii">5. Spacial-domain filtering II</a>
+<ul class="sectlevel2">
+<li><a href="#_5_1_tiltshift">5.1. Tiltshift</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div id="content">
-<div class="sect1">
-<h2 id="_professor_agostinho_de_medeiros_brito_junior">Professor: Agostinho de Medeiros Brito Junior</h2>
+<div id="preamble">
 <div class="sectionbody">
+<div class="paragraph">
+<p>First part of the digital image processing course</p>
+</div>
+<div class="paragraph">
+<p>Hi! I' am Pedro Henrique Braga Moraes and this work is a part of the digital image processing course ministered by professor Agostinho de Medeiros Brito, at UFRN. Here you will find a lot of OpenCV and jojo&#8217;s references.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_1_manipulating_pixels_in_an_image">1. Manipulating pixels in an image</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_1_1_negative">1.1. Negative</h3>
+<div class="paragraph">
+<p>This first program basicaly asks the cordinates from the user and take the negative of the rectangular region. The algorithm converts the image to grayscale and for each pixel in the region it makes 255 - (value of the pixel).</p>
+</div>
+<div class="paragraph">
+<p>Berserk.jpg before negative:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/berserk.jpg" alt="berserk">
+</div>
+<div class="title">Figure 1. Guts before negative:</div>
+</div>
+<div class="paragraph">
+<p>Berserk.jpg after negative:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/negativo.jpg" alt="negativo">
+</div>
+<div class="title">Figure 2. Guts after negative:</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
 
+using namespace cv;
+using namespace std;
+
+
+
+int main(int, char**){
+  int X1, X2, Y1, Y2;
+  Mat image;
+  Vec3b val;
+
+  do{
+  cout&lt;&lt;"Digite o valor de X1:  ";
+  cin &gt;&gt; X1;
+  cout &lt;&lt; endl;
+  if (X1&gt;960 || X1&lt;0)
+    cout &lt;&lt; "Numero fora da faixa! Digite outro! ";
+    cout &lt;&lt; endl;}
+  while (X1&gt;960 || X1&lt;0);
+
+  do{
+  cout&lt;&lt;"Digite o valor de X2:  ";
+  cin &gt;&gt; X2;
+  cout &lt;&lt; endl;
+  if (X2&gt;960 || X2&lt;0)
+    cout &lt;&lt; "Numero fora da faixa! Digite outro! ";
+    cout &lt;&lt; endl;}
+  while (X2&gt;960 || X2&lt;0);
+
+
+  do{
+  cout&lt;&lt;"Digite o valor de Y1:  ";
+  cin &gt;&gt; Y1;
+  cout &lt;&lt; endl;
+  if (Y1&gt;540 || Y1&lt;0)
+    cout &lt;&lt; "Numero fora da faixa! Digite outro! ";
+    cout &lt;&lt; endl;}
+  while (Y1&gt;540 || Y1&lt;0);
+
+
+  do{
+  cout&lt;&lt;"digite o valor de Y2:  ";
+  cin &gt;&gt; Y2;
+  cout &lt;&lt; endl;
+  if (Y2&gt;540 || Y2&lt;0)
+    cout &lt;&lt; "Numero fora da faixa! Digite outro! ";
+    cout &lt;&lt; endl;}
+  while (Y2&gt;540 || Y2&lt;0);
+
+
+  image= imread("berserk.jpg",CV_LOAD_IMAGE_GRAYSCALE);
+  if(!image.data)
+    cout &lt;&lt; "nao abriu berserk.jpg" &lt;&lt; endl;
+
+  namedWindow("janela",WINDOW_AUTOSIZE);
+
+  for(int j=X1;j&lt;X2;j++){ // eixo x e y invertidos, y é o eixo horizontal e x o vertical
+    for(int i=Y1;i&lt;Y2;i++){
+       image.at&lt;uchar&gt;(i, j) =  255 - image.at&lt;uchar&gt;(i, j);
+    }
+  }
+
+  imshow("janela", image);
+  //imwrite("negativo.jpg", image);
+
+  waitKey();
+  return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_1_2_swapping_regions">1.2. Swapping regions</h3>
+<div class="paragraph">
+<p>This code divides the image in 4 quadrants and swaps the regions.</p>
+</div>
+<div class="paragraph">
+<p>mononoke.jpg before swap:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/mononoke.jpg" alt="mononoke">
+</div>
+<div class="title">Figure 3. Mononoke Hime before swap</div>
+</div>
+<div class="paragraph">
+<p>mononoke.jpg after swap:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/trocada.jpg" alt="trocada">
+</div>
+<div class="title">Figure 4. Mononoke Hime after swap</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+
+
+int main(int, char**){
+
+  Mat image;
+  image = imread("mononoke.jpg");
+  int r = image.rows;
+  int mr = image.rows/2;
+  int c = image.cols;
+  int mc = image.cols/2;
+  Mat vazia = Mat::zeros(r, c, CV_8UC3);
+  if(!image.data)
+    cout &lt;&lt; "nao abriu a imagem!" &lt;&lt; endl;
+
+  namedWindow("trocada", WINDOW_AUTOSIZE);
+
+  for(int j=0;j&lt;c;j++){
+    for(int i=0;i&lt;r;i++)
+
+      {
+         if(i &lt; mr &amp;&amp; j &lt; mc)
+            vazia.at&lt;Vec3b&gt;(i, j) =  image.at&lt;Vec3b&gt;(i+mr, j+mc);
+         if(i &gt; mr &amp;&amp; j &gt; mc)
+         	vazia.at&lt;Vec3b&gt;(i, j) =  image.at&lt;Vec3b&gt;(i-mr, j-mc);
+         if(i &gt; mr &amp;&amp; j &lt; mc)
+         	vazia.at&lt;Vec3b&gt;(i, j) =  image.at&lt;Vec3b&gt;(i-mr, j+mc);
+         if(i &lt; mr &amp;&amp; j &gt; mc)
+         	vazia.at&lt;Vec3b&gt;(i, j) =  image.at&lt;Vec3b&gt;(i+mr, j-mc);
+      }
+
+  }
+
+  imshow("trocada", vazia);
+  imwrite("trocada.jpg", vazia);
+
+  waitKey();
+  return 0;
+}</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_2_objects_couting">2. Objects couting</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_2_1_labeling">2.1. Labeling</h3>
+<div class="paragraph">
+<p>This program counts the objects in the image, differentiating the ones with and without holes.</p>
+</div>
+<div class="paragraph">
+<p>First we have the image:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/bolhas.png" alt="bolhas">
+</div>
+<div class="title">Figure 5. bolhas.png</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+  Mat image, mask;
+  int c, r, total = 0, hole = 0;
+
+
+  CvPoint p;
+  image = imread(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
+
+  if(!image.data){
+    std::cout &lt;&lt; "imagem nao carregou corretamente\n";
+    return(-1);
+  }
+  c=image.cols;
+  r=image.rows;
+
+  p.x=0;
+  p.y=0;
+
+
+
+  for(int i=0; i&lt;r; i++){
+    for(int j=0; j&lt;c; j++){
+      if(image.at&lt;uchar&gt;(i,j) == 255){
+
+		if(i == 0 || j == 0 || i == (r-1) || j == (c-1) ){
+		p.x=j;
+		p.y=i;
+		floodFill(image,p, 0);}
+	  }
+	}
+  }
+
+  p.x = 0;
+  p.y = 0;
+  floodFill(image, p, 200);
+
+  for(int i=0; i&lt;r; i++){
+    for(int j=0; j&lt;c; j++){
+      if(image.at&lt;uchar&gt;(i,j) == 255){
+        p.x=j;
+        p.y=i;
+        total++;
+        //colour1++;
+        floodFill(image, p, 30);
+ }}}
+
+ imshow("image", image);
+ imwrite("bolhas1.png", image);
+   waitKey();
+  for(int i=0; i&lt;r; i++){
+    for(int j=0; j&lt;c; j++){
+      if(image.at&lt;uchar&gt;(i,j) == 0){
+        if(image.at&lt;uchar&gt;(i-1,j) != 200){
+          hole++;
+          p.x=j;
+          p.y=i;
+          floodFill(image, p, 200);
+          p.x=j;
+          p.y=i-1;
+          floodFill(image, p, 200);}
+        else
+          p.x=j;
+          p.y=i;
+          floodFill(image,p, 200);
+
+
+
+          }}}
+
+
+
+  imshow("image", image);
+  imwrite("labeling.png", image);
+  cout &lt;&lt; "total objects: " &lt;&lt; total &lt;&lt;endl;
+  cout &lt;&lt; "total hole objects: " &lt;&lt; hole &lt;&lt;endl;
+  cout &lt;&lt; "total sem hole objects: " &lt;&lt; total - hole &lt;&lt;endl;
+  waitKey();
+  return 0;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>After running the program, the first thing that happens is deleting the objects that touch the boarder:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/bolhas1.png" alt="bolhas1">
+</div>
+<div class="title">Figure 6. bolhas.png after deleting the objects that touch the boarder</div>
+</div>
+<div class="paragraph">
+<p>Then the counting can happen:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/labeling.png" alt="labeling">
+</div>
+<div class="title">Figure 7. bolhas.png after labeling</div>
+</div>
+<div class="paragraph">
+<p>Results:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/n.png" alt="n">
+</div>
+<div class="title">Figure 8. Total number of bubbles in image</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s worth poiting out that this programs works also with images that have objects with two or more holes.</p>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_aluno_pedro_henrique_braga_moraes">Aluno: Pedro Henrique Braga Moraes</h2>
+<h2 id="_3_histograms">3. Histograms</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_3_1_equalize_image">3.1. Equalize image</h3>
+<div class="paragraph">
+<p>The algorithm below equilizes and shows the image&#8217;s histogram.</p>
+</div>
+<div class="paragraph">
+<p>Original image:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/nice.jpg" alt="nice">
+</div>
+<div class="title">Figure 9. Joseph Joestar saying nice</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
 
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+Mat img, img_eq, hist, hist_eq;
+int nbins = 64;
+
+float range[] = {0, 256};
+const float *histrange = { range };
+
+img= imread("nice.jpg",CV_LOAD_IMAGE_GRAYSCALE);
+  if(!img.data)
+    cout &lt;&lt; "nao abriu nice.jpg" &lt;&lt; endl;
+
+equalizeHist( img, img_eq );
+
+
+bool uniform = true;
+bool acummulate = false;
+
+int histw = nbins, histh = nbins / 2;
+Mat hist_img(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+Mat hist_img_eq(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+
+calcHist(&amp;img, 1, 0, Mat(), hist, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+calcHist(&amp;img_eq, 1, 0, Mat(), hist_eq, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+normalize(hist_eq, hist_eq, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+hist_img.setTo(Scalar(0));
+hist_img_eq.setTo(Scalar(0));
+
+for(int i=0; i&lt;nbins; i++){
+  line(hist_img, Point(i, histh), Point(i, 32 - cvRound(hist.at&lt;float&gt;(i))), Scalar(255, 255, 255), 1, 8, 0);
+  line(hist_img_eq, Point(i, histh), Point(i, 32 - cvRound(hist_eq.at&lt;float&gt;(i))), Scalar(255, 255, 255), 1, 8, 0);}
+
+hist_img.copyTo(img(Rect(15, 15, nbins, histh)));
+hist_img_eq.copyTo(img_eq(Rect(15, 15, nbins, histh)));
+
+
+
+
+namedWindow("nice",WINDOW_AUTOSIZE);
+namedWindow("equilised_nice",WINDOW_AUTOSIZE);
+
+
+
+imshow( "nice", img );
+imshow( "equalised_nice", img_eq );
+imwrite("nice_hist.jpg", img);
+imwrite("nice_equilised_hist.jpg", img_eq);
+
+waitKey();
+return 0;}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output, jojo and the histogram:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/nice_hist.jpg" alt="nice hist">
+</div>
+<div class="title">Figure 10. Joseph Joestar saying nice&#8217;s histogram</div>
+</div>
+<div class="paragraph">
+<p>Jojo and the equalized histogram:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/nice_equilised_hist.jpg" alt="nice equilised hist">
+</div>
+<div class="title">Figure 11. Joseph Joestar sayng nice&#8217;s histogram after equalisation</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_2_equilize_video">3.2. Equilize video</h3>
+<div class="paragraph">
+<p>The same process, but now with a video of an amazing spear fight:</p>
+</div>
+<div class="videoblock">
+<div class="title">Spear fight:</div>
+<div class="content">
+<video src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/barca.mp4" controls>
+Your browser does not support the video tag.
+</video>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+Mat img, img_eq, hist, hist_eq;
+int nbins = 64;
+
+float range[] = {0, 256};
+const float *histrange = { range };
+
+VideoCapture cap("barca.mp4");
+  if(!cap.isOpened()){
+    cout &lt;&lt; "Erro abrindo o video!" &lt;&lt;endl;
+    return -1;
+  }
+int width  = cap.get(CV_CAP_PROP_FRAME_WIDTH);
+int height = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
+//VideoWriter video1("barca.avi",CV_FOURCC('P','I','M','1'),30, Size(width, height),0);
+//VideoWriter video2("barca_eq.avi",CV_FOURCC('P','I','M','1'),30, Size(width, height),0);
+while(1){
+    cap &gt;&gt; img;
+    if (img.empty())
+     	break;
+cvtColor(img, img, CV_BGR2GRAY);
+equalizeHist( img, img_eq );
+
+
+bool uniform = true;
+bool acummulate = false;
+
+int histw = nbins, histh = nbins / 2;
+Mat hist_img(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+Mat hist_img_eq(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+
+calcHist(&amp;img, 1, 0, Mat(), hist, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+calcHist(&amp;img_eq, 1, 0, Mat(), hist_eq, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+normalize(hist_eq, hist_eq, 0, hist_img_eq.rows, NORM_MINMAX, -1, Mat());
+
+hist_img.setTo(Scalar(0));
+hist_img_eq.setTo(Scalar(0));
+
+for(int i=0; i&lt;nbins; i++){
+  line(hist_img, Point(i, histh), Point(i, 32 - cvRound(hist.at&lt;float&gt;(i))), Scalar(255, 255, 255), 1, 8, 0);
+  line(hist_img_eq, Point(i, histh), Point(i, 32 - cvRound(hist_eq.at&lt;float&gt;(i))), Scalar(255, 255, 255), 1, 8, 0);}
+
+hist_img.copyTo(img(Rect(15, 15, nbins, histh)));
+hist_img_eq.copyTo(img_eq(Rect(15, 15, nbins, histh)));
+
+
+
+
+
+//video1.write(img);
+//video2.write(img_eq);
+namedWindow("nice",WINDOW_AUTOSIZE);
+namedWindow("equilised_video",WINDOW_AUTOSIZE);
+
+
+if (img.empty())
+     	break;
+
+imshow( "video", img );
+imshow( "equalised_video", img_eq );
+if(waitKey(30) &gt;= 0)
+    	break;
+}
+cap.release();
+destroyAllWindows();
+
+
+waitKey();
+return 0;}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output:</p>
+</div>
+<div class="videoblock">
+<div class="title">Spear fight with histogram:</div>
+<div class="content">
+<video src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/barca_hist.mp4" controls>
+Your browser does not support the video tag.
+</video>
+</div>
+</div>
+<div class="videoblock">
+<div class="title">Spear fight with histogram after equalization:</div>
+<div class="content">
+<video src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/barca_eq_hist.mp4" controls>
+Your browser does not support the video tag.
+</video>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_3_3_motion_detection">3.3. Motion detection</h3>
+<div class="paragraph">
+<p>This programs alerts Iggy when Petshop arrives, it detects the drastic changes in the pixels. Take care of yourself Iggy, you have to help defeat Dio!</p>
+</div>
+<div class="paragraph">
+<p>The input:</p>
+</div>
+<div class="videoblock">
+<div class="title">Iggy vs. Petshop:</div>
+<div class="content">
+<video src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/petshop.mp4" controls>
+Your browser does not support the video tag.
+</video>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;cmath&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+int main(int argc, char** argv){
+
+Mat frame, img,  hist, frame_hist;
+int nbins = 64;
+double compara;
+float range[] = {0, 256};
+const float *histrange = { range };
+
+bool uniform = true;
+bool acummulate = false;
+
+VideoCapture cap("petshop.mp4");
+  if(!cap.isOpened()){
+    cout &lt;&lt; "Erro abrindo o video!" &lt;&lt;endl;
+    return -1;
+  }
+
+int histw = nbins, histh = nbins / 2;
+Mat hist_img(histh, histw, CV_8UC1, Scalar(0, 0, 0));
+
+cap &gt;&gt; frame;
+
+cvtColor(frame, frame, CV_BGR2GRAY);
+calcHist(&amp;frame, 1, 0, Mat(), frame_hist, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+normalize(frame_hist, frame_hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+while(1){
+
+cap &gt;&gt; img;
+
+if (!img.data)
+     	break;
+cvtColor(img, img, CV_BGR2GRAY);
+calcHist(&amp;img, 1, 0, Mat(), hist, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+compara = compareHist(hist, frame_hist, CV_COMP_CORREL);
+		if (compara &lt; 0.90)
+			cout &lt;&lt; "Surpresa Iggy!" &lt;&lt; endl;
+
+cap &gt;&gt; frame;
+
+cvtColor(frame, frame, CV_BGR2GRAY);
+calcHist(&amp;frame, 1, 0, Mat(), frame_hist, 1, &amp;nbins, &amp;histrange, uniform, acummulate);
+normalize(hist, hist, 0, hist_img.rows, NORM_MINMAX, -1, Mat());
+
+namedWindow("compara",WINDOW_AUTOSIZE);
+
+
+
+imshow( "compara", img );
+
+if(waitKey(30) &gt;= 0)
+    	break;
+}
+cap.release();
+destroyAllWindows();
+
+
+waitKey(0);
+return 0;}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Output:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/iggy1.png" alt="iggy1">
+</div>
+<div class="title">Figure 12. Output before Iggy get a fright</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/iggy2.png" alt="iggy2">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/iggy3.png" alt="iggy3">
+</div>
+<div class="title">Figure 13. Output after Iggy get a fright</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s important to say that a compression happens in this process, since we are processing two frames in each loop.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_4_spacial_domain_filtering_i">4. Spacial-domain filtering I</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_4_1_different_kinds_of_filtering">4.1. Different kinds of filtering</h3>
+<div class="paragraph">
+<p>After running the code, the image is filtered with differents kernels, we can see it bellow.</p>
+</div>
+<div class="paragraph">
+<p>Original image:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/Kaori_Miyazono.png" alt="Kaori Miyazono">
+</div>
+<div class="title">Figure 14. Kaori before spatial filtering</div>
+</div>
+<div class="paragraph">
+<p>Grayscale:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/grayscale.jpg" alt="grayscale">
+</div>
+<div class="title">Figure 15. Grayscale Kaori</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+
+using namespace cv;
+using namespace std;
+
+void printmask(Mat &amp;m) {
+	for (int i = 0; i &lt; m.size().height; i++) {
+		for (int j = 0; j &lt; m.size().width; j++) {
+			cout &lt;&lt; m.at&lt;float&gt;(i, j) &lt;&lt; ",";
+		}
+		cout &lt;&lt; endl;
+	}
+}
+
+void menu() {
+	cout &lt;&lt; "\npressione a tecla para ativar o filtro: \n"
+		"a - calcular modulo\n"
+		"m - media\n"
+		"g - gauss\n"
+		"v - vertical\n"
+		"h - horizontal\n"
+		"l - laplaciano\n"
+		"p - laplgauss\n"
+		"esc - sair\n";
+}
+
+int main(int argvc, char** argv) {
+
+	float media[] = { 1,1,1,
+		1,1,1,
+		1,1,1 };
+	float gauss[] = { 1,2,1,
+		2,4,2,
+		1,2,1 };
+	float vertical[] = { -1,0,1,
+		-2,0,2,
+		-1,0,1 };
+	float horizontal[] = { -1,-2,-1,
+		0,0,0,
+		1,2,1 };
+	float laplacian[] = { 0,-1,0,
+		-1,4,-1,
+		0,-1,0 };
+
+	float laplgauss[] = {0,0,1,0,0,
+		 0,1,2,1,0,
+		1,2,-16,2,1,
+		 0,1,2,1,0,
+		 0,0,1,0,0};
+	Mat img = imread("Kaori_Miyazono.png");
+	if(!img.data)
+    cout &lt;&lt; "nao abriu bolhas.png" &lt;&lt; endl;
+	Mat  frame, frame32f, frameFiltered;
+	Mat mask(3, 3, CV_32F), mask1;
+	Mat result, result1;
+	double width, height;
+	int absolut;
+	char key;
+
+	width = img.cols;
+	height = img.rows;
+	std::cout &lt;&lt; "largura=" &lt;&lt; width &lt;&lt; "\n";;
+	std::cout &lt;&lt; "altura =" &lt;&lt; height &lt;&lt; "\n";;
+
+	namedWindow("filtroespacial", 1);
+
+	mask = Mat(3, 3, CV_32F, media);
+	scaleAdd(mask, 1 / 9.0, Mat::zeros(3, 3, CV_32F), mask1);
+	swap(mask, mask1);
+	absolut = 1;
+	menu();
+	for (;;) {
+		cvtColor(img, frame, CV_BGR2GRAY);
+		flip(frame, frame, 1);
+		imshow("original", frame);
+
+		frame.convertTo(frame32f, CV_32F);
+		//imwrite("grayscale.jpg", frame);
+		filter2D(frame32f, frameFiltered, frame32f.depth(), mask, Point(1, 1), 0);
+		if (absolut) {
+			frameFiltered = abs(frameFiltered);
+		}
+		frameFiltered.convertTo(result, CV_8U);
+		imshow("filtroespacial", result);
+		key = (char)waitKey(10);
+		if (key == 27) break;
+		switch (key) {
+		case 'a':
+			menu();
+			absolut = !absolut;
+			break;
+		case 'm':
+			menu();
+			mask = Mat(3, 3, CV_32F, media);
+			scaleAdd(mask, 1 / 9.0, Mat::zeros(3, 3, CV_32F), mask1);
+			mask = mask1;
+			printmask(mask);
+			//imwrite("media.jpg", frameFiltered);
+			break;
+		case 'g':
+			menu();
+			mask = Mat(3, 3, CV_32F, gauss);
+			scaleAdd(mask, 1 / 16.0, Mat::zeros(3, 3, CV_32F), mask1);
+			mask = mask1;
+			printmask(mask);
+			//imwrite("gauss.jpg", frameFiltered);
+			break;
+		case 'h':
+			menu();
+			mask = Mat(3, 3, CV_32F, horizontal);
+			printmask(mask);
+			//imwrite("horizontal.jpg", frameFiltered);
+			break;
+		case 'v':
+			menu();
+			mask = Mat(3, 3, CV_32F, vertical);
+			printmask(mask);
+			//imwrite("vertical.jpg", frameFiltered);
+			break;
+		case 'l':
+			menu();
+			mask = Mat(3, 3, CV_32F, laplacian);
+			printmask(mask);
+			//imwrite("laplaciano.jpg", frameFiltered);
+			break;
+
+		case 'p':
+			menu();
+			mask = Mat(5, 5, CV_32F, laplgauss);
+			printmask(mask);
+			//imwrite("laplaciano_gaussiano.jpg", frameFiltered);
+			break;
+		default:
+			break;
+		}
+	}
+	return 0;
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Gauss:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/gauss.jpg" alt="gauss">
+</div>
+<div class="title">Figure 16. Kaori after gaussian filtering</div>
+</div>
+<div class="paragraph">
+<p>Media:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/media.jpg" alt="media">
+</div>
+<div class="title">Figure 17. Kaori after media filtering</div>
+</div>
+<div class="paragraph">
+<p>Horizontal:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/horizontal.jpg" alt="horizontal">
+</div>
+<div class="title">Figure 18. Kaori after horizontal filtering</div>
+</div>
+<div class="paragraph">
+<p>Vertical:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/vertical.jpg" alt="vertical">
+</div>
+<div class="title">Figure 19. Kaori after vertical filtering</div>
+</div>
+<div class="paragraph">
+<p>Laplacian:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/laplaciano.jpg" alt="laplaciano">
+</div>
+<div class="title">Figure 20. Kaori after laplacian filtering</div>
+</div>
+<div class="paragraph">
+<p>Laplacian + Gaussian:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/pedro/Documentos/pedro/engenharia_eletrica/pdi/images/laplaciano_gaussiano.jpg" alt="laplaciano gaussiano">
+</div>
+<div class="title">Figure 21. Kaori after Gaussian + Laplacian filtering</div>
+</div>
+<div class="paragraph">
+<p>We can see that using Laplacian + Gaussian filtering, the contours are now more well defined.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_5_spacial_domain_filtering_ii">5. Spacial-domain filtering II</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_5_1_tiltshift">5.1. Tiltshift</h3>
+
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-09-12 16:23:47 -03
+Last updated 2018-09-13 21:44:45 -03
 </div>
 </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlighting()</script>
 </body>
 </html>
