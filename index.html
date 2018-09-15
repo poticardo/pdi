@@ -1354,14 +1354,102 @@ int main(int argvc, char** argv) {
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="_5_1_tiltshift">5.1. Tiltshift</h3>
+<div class="paragraph">
+<p>Below we have the tilt-shift code, the algorithm simulates a change in the focus on the image, partially blurring it.</p>
+</div>
+<div class="paragraph">
+<p>This technique is very used in cinema industy, a recent exemple is the 2018 movie, Hereditary, where using the tilt-shift with the rigth angle and a frame skip techinique, we have the footage looking like miniatures.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-C++ hljs" data-lang="C++">#include &lt;iostream&gt;
+#include &lt;opencv2/opencv.hpp&gt;
+#include &lt;math.h&gt;
 
+using namespace cv;
+using namespace std;
+
+int main(int argvc, char** argv) {
+
+  Mat image = imread("nausicaa.jpg");
+  Mat gauss_image = Mat::zeros(image.rows, image.cols, CV_32FC3);
+  Mat focus_image = Mat::zeros(image.rows, image.cols, CV_32FC3);
+  Mat unfocus_image = Mat::zeros(image.rows, image.cols, CV_32FC3);
+  Mat focus_mask = Mat(image.rows, image.cols, CV_32FC3, Scalar(0, 0, 0));
+  Mat unfocus_mask = Mat(image.rows, image.cols, CV_32FC3, Scalar(1, 1, 1));
+    Mat output = Mat::zeros(image.rows, image.cols, CV_32FC3);
+    Vec3f mask_function_value;
+
+  float unfocus = 0.30;
+  int decay = 50;
+  int l1 = unfocus*image.rows;
+  int l2 = image.rows - unfocus*image.rows;
+
+
+
+
+  for (int i = 0; i &lt; image.rows; i++) {
+    for (int j = 0; j &lt; image.cols; j++) {
+      mask_function_value[0] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      mask_function_value[1] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      mask_function_value[2] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      focus_mask.at&lt;Vec3f&gt;(i, j) = mask_function_value;
+    }
+  }
+
+  unfocus_mask = unfocus_mask - focus_mask;
+
+    image.convertTo(image, CV_32FC3);
+  GaussianBlur(image, gauss_image, Size(7, 7), 0, 0);
+
+
+
+    focus_image = image.mul(focus_mask);
+  unfocus_image = gauss_image.mul(unfocus_mask);
+
+  output = focus_image + unfocus_image;
+
+  image.convertTo(image, CV_8UC3);
+  output.convertTo(output, CV_8UC3);
+
+    imshow("input", image);
+  imshow("tiltshift", output);
+  imwrite("nausicaa_tilt.jpg", output);
+
+    waitKey();
+    return 0;
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Altough the algorithm above just works with images.</p>
+</div>
+<div class="paragraph">
+<p>Input:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/nausicaa.jpg" alt="nausicaa">
+</div>
+<div class="title">Figure 22. nausicaa.jpg before tilt-shift</div>
+</div>
+<div class="paragraph">
+<p>Output:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/nausicaaa.jpg" alt="nausicaaa">
+</div>
+<div class="title">Figure 23. Input after tilt-shift</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-09-13 23:14:38 -03
+Last updated 2018-09-14 22:13:03 -03
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">

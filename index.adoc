@@ -750,6 +750,85 @@ We can see that using Laplacian + Gaussian filtering, the contours are now more 
 
 === 5.1. Tiltshift
 
+Below we have the tilt-shift code, the algorithm simulates a change in the focus on the image, partially blurring it.
+
+This technique is very used in cinema industy, a recent exemple is the 2018 movie, Hereditary, where using the tilt-shift with the rigth angle and a frame skip techinique, we have the footage looking like miniatures.
+
+[source, C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include <math.h>
+
+using namespace cv;
+using namespace std;
+
+int main(int argvc, char** argv) {
+
+  Mat image = imread("nausicaa.jpg");
+  Mat gauss_image = Mat::zeros(image.rows, image.cols, CV_32FC3);
+  Mat focus_image = Mat::zeros(image.rows, image.cols, CV_32FC3);
+  Mat unfocus_image = Mat::zeros(image.rows, image.cols, CV_32FC3);
+  Mat focus_mask = Mat(image.rows, image.cols, CV_32FC3, Scalar(0, 0, 0));
+  Mat unfocus_mask = Mat(image.rows, image.cols, CV_32FC3, Scalar(1, 1, 1));
+    Mat output = Mat::zeros(image.rows, image.cols, CV_32FC3);
+    Vec3f mask_function_value;
+    
+  float unfocus = 0.30; 
+  int decay = 50; 
+  int l1 = unfocus*image.rows;
+  int l2 = image.rows - unfocus*image.rows;
+  
+
+  
+
+  for (int i = 0; i < image.rows; i++) {
+    for (int j = 0; j < image.cols; j++) {
+      mask_function_value[0] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      mask_function_value[1] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      mask_function_value[2] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      focus_mask.at<Vec3f>(i, j) = mask_function_value;
+    }
+  }
+
+  unfocus_mask = unfocus_mask - focus_mask;
+    
+    image.convertTo(image, CV_32FC3);
+  GaussianBlur(image, gauss_image, Size(7, 7), 0, 0);
+
+    
+
+    focus_image = image.mul(focus_mask);
+  unfocus_image = gauss_image.mul(unfocus_mask);
+
+  output = focus_image + unfocus_image;
+
+  image.convertTo(image, CV_8UC3);
+  output.convertTo(output, CV_8UC3);
+
+    imshow("input", image);
+  imshow("tiltshift", output);
+  imwrite("nausicaa_tilt.jpg", output);
+
+    waitKey();
+    return 0;
+
+}
+
+----
+
+
+Altough the algorithm above just works with images.
+
+Input:
+
+.nausicaa.jpg before tilt-shift
+image::nausicaa.jpg[]
+
+Output:
+
+.Input after tilt-shift
+image::nausicaaa.jpg[]
 
 
 
