@@ -752,7 +752,7 @@ We can see that using Laplacian + Gaussian filtering, the contours are now more 
 
 Below we have the tilt-shift code, the algorithm simulates a change in the focus on the image, partially blurring it.
 
-This technique is very used in cinema industy, a recent exemple is the 2018 movie, Hereditary, where using the tilt-shift with the rigth angle and a frame skip techinique, we have the footage looking like miniatures.
+This technique is very used in cinema industy, a recent exemple is the 2018 movie, Hereditary, where using the tilt-shift we have the footage looking like miniatures.
 
 [source, C++]
 ----
