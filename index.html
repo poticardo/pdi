@@ -1378,7 +1378,7 @@ int main(int argvc, char** argv) {
   Mat focus_mask = Mat(image.rows, image.cols, CV_32FC3, Scalar(0, 0, 0));
   Mat unfocus_mask = Mat(image.rows, image.cols, CV_32FC3, Scalar(1, 1, 1));
     Mat output = Mat::zeros(image.rows, image.cols, CV_32FC3);
-    Vec3f mask_function_value;
+    Vec3f funcion_output;
 
   float unfocus = 0.30;
   int decay = 50;
@@ -1390,10 +1390,10 @@ int main(int argvc, char** argv) {
 
   for (int i = 0; i &lt; image.rows; i++) {
     for (int j = 0; j &lt; image.cols; j++) {
-      mask_function_value[0] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
-      mask_function_value[1] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
-      mask_function_value[2] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
-      focus_mask.at&lt;Vec3f&gt;(i, j) = mask_function_value;
+      funcion_output[0] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      funcion_output[1] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      funcion_output[2] = (tanh((float(i - l1) / decay)) - tanh((float(i - l2) / decay))) / 2;
+      focus_mask.at&lt;Vec3f&gt;(i, j) = funcion_output;
     }
   }
 
@@ -1449,7 +1449,7 @@ int main(int argvc, char** argv) {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-09-14 22:20:42 -03
+Last updated 2018-09-14 22:24:02 -03
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
