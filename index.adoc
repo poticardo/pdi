@@ -362,7 +362,7 @@ Jojo and the equalized histogram:
 .Joseph Joestar sayng nice's histogram after equalisation
 image::nice_equilised_hist.jpg[]
 
-=== 3.2. Equilize video
+=== 3.2. Equalize video
 
 The same process, but now with a video of an amazing spear fight:
 
