@@ -2,8 +2,6 @@
 :toc: left
 :source-highlighter: highlightjs
 
-First part of the digital image processing course
-
 Hi! I' am Pedro Henrique Braga Moraes and this work is a part of the digital image processing course ministered by professor Agostinho de Medeiros Brito, at UFRN. Here you will find a lot of OpenCV and jojo's references.
 
 == 1. Manipulating pixels in an image
@@ -16,12 +14,12 @@ This first program basicaly asks the cordinates from the user and take the negat
 
 Berserk.jpg before negative:
 
-.Guts before negative:
+.Guts before negative
 image::berserk.jpg[]
 
 Berserk.jpg after negative:
 
-.Guts after negative:
+.Guts after negative
 image::negativo.jpg[]
 
 [source,C++]
@@ -554,11 +552,11 @@ image::iggy3.png[]
 
 It's important to say that a compression happens in this process, since we are processing two frames in each loop.
 
-== 4. Spacial-domain filtering I
+== 4. Spatial-domain filtering I
 
 === 4.1. Different kinds of filtering
 
-After running the code, the image is filtered with differents kernels, we can see it bellow.
+After running the code, the image is filtered with different kernels, we can see it below.
 
 Original image:
 
@@ -746,13 +744,13 @@ image::laplaciano_gaussiano.jpg[]
 
 We can see that using Laplacian + Gaussian filtering, the contours are now more well defined.
 
-== 5. Spacial-domain filtering II
+== 5. Spatial-domain filtering II
 
 === 5.1. Tiltshift
 
-Below we have the tilt-shift code, the algorithm simulates a change in the focus of the image, partially blurring it.
+Below we have the tilt-shift code, the algorithm simulates a change in focus of the image, partially blurring it.
 
-This technique is very used in cinema industy, a recent example is the 2018 movie, Hereditary, where using the tilt-shift we have the footage looking like miniatures.
+This technique is very used in cinema industry, a recent example is the 2018 movie, Hereditary, where using the tilt-shift we have the footage looking like miniatures.
 
 [source, C++]
 ----
@@ -818,7 +816,7 @@ int main(int argvc, char** argv) {
 ----
 
 
-Altough the algorithm above works just with images.
+Altough, the algorithm above works just with images.
 
 Input:
 
@@ -829,6 +827,375 @@ Output:
 
 .nausicaa.jpg after tilt-shift
 image::nausicaaa.jpg[]
+
+== 6. Frequence-domain filtering
+
+=== 6.1. Homomorphic filtering
+
+The homomorphic filtering process is based on the principles of illuminace and reflectance. The illuminance represents slow spatial variations (low frequences), the reflectance represents fast spatial variations (high frequences). We take the fourier transform of the image and apply a sequential filter (modified version of gaussian filter) that attenuates low frequences and maintain high frequences (high-pass filter) and do the inverse fourier transform, this way, improving illuminance of image.
+
+We can see the input below, Man with no name, Clint Eastwood's character from A Fistful of Dollars movie:
+
+.Clint.jpg before filtering
+image::Clint.jpg[]
+
+Output:
+ 
+.Clint.jpg after filtering
+image::Filtered_clint.png[]
+
+Code below:
+
+[source, C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+#define RADIUS 20
+
+using namespace cv;
+using namespace std;
+
+// troca os quadrantes da imagem da DFT
+void deslocaDFT(Mat& image ){
+  Mat tmp, A, B, C, D;
+
+  // se a imagem tiver tamanho impar, recorta a regiao para
+  // evitar cópias de tamanho desigual
+  image = image(Rect(0, 0, image.cols & -2, image.rows & -2));
+  int cx = image.cols/2;
+  int cy = image.rows/2;
+  
+  // reorganiza os quadrantes da transformada
+  // A B   ->  D C
+  // C D       B A
+  A = image(Rect(0, 0, cx, cy));
+  B = image(Rect(cx, 0, cx, cy));
+  C = image(Rect(0, cy, cx, cy));
+  D = image(Rect(cx, cy, cx, cy));
+
+  // A <-> D
+  A.copyTo(tmp);  D.copyTo(A);  tmp.copyTo(D);
+
+  // C <-> B
+  C.copyTo(tmp);  B.copyTo(C);  tmp.copyTo(B);
+}
+
+int main(int argc, char** argv){
+    
+  Mat imaginaryInput, complexImage, multsp;
+  Mat padded, filter, mag;
+  Mat image, imagegray, tmp; 
+  Mat_<float> realInput, zeros;
+  vector<Mat> planos;
+
+  if(argc!=2){
+  exit(0);
+  }
+  image = imread(argv[1],CV_LOAD_IMAGE_GRAYSCALE);
+  
+  // valores ideais dos tamanhos da imagem
+  // para calculo da DFT
+
+  int dft_M, dft_N;
+
+  // identifica os tamanhos otimos para
+  // calculo do FFT
+  dft_M = getOptimalDFTSize(image.rows);
+  dft_N = getOptimalDFTSize(image.cols);
+
+  // realiza o padding da imagem
+  copyMakeBorder(image, padded, 0,
+                 dft_M - image.rows, 0,
+                 dft_N - image.cols,
+                 BORDER_CONSTANT, Scalar::all(0));
+
+  // parte imaginaria da matriz complexa (preenchida com zeros)
+  zeros = Mat_<float>::zeros(padded.size());
+
+  // prepara a matriz complexa para ser preenchida
+  complexImage = Mat(padded.size(), CV_32FC2, Scalar(0));
+
+  // a função de transferência (filtro frequencial) deve ter o
+  // mesmo tamanho e tipo da matriz complexa
+  filter = complexImage.clone();
+
+  // cria uma matriz temporária para criar as componentes real
+  // e imaginaria do filtro ideal
+  tmp = Mat(dft_M, dft_N, CV_32F);
+
+  // filtro homomorfico
+
+  float gamah, gamal, c, D0;
+  gamah = 150;
+  gamal = 75;
+  c = 15;
+  D0 = 25;
+  int M = dft_M;
+  int N = dft_N;
+
+for (int i = 0; i < dft_M; i++) {
+    for (int j = 0; j < dft_N; j++) {
+      tmp.at<float>(i, j) = (gamah - gamal)*(1.0 - exp(-1.0*(float)c*((((float)i - M / 2.0)*((float)i - M / 2.0) + ((float)j - N / 2.0)*((float)j - N / 2.0)) / (D0*D0)))) + gamal;
+    }
+  }
+
+  // cria a matriz com as componentes do filtro e junta
+  // ambas em uma matriz multicanal complexa
+  Mat comps[]= {tmp, tmp};
+  merge(comps, 2, filter);
+
+    // limpa o array de matrizes que vao compor a
+    // imagem complexa
+    planos.clear();
+    // cria a compoente real
+    realInput = Mat_<float>(padded);
+    // insere as duas componentes no array de matrizes
+    planos.push_back(realInput);
+    planos.push_back(zeros);
+
+    // combina o array de matrizes em uma unica
+    // componente complexa
+    merge(planos, complexImage);
+
+    // calcula o dft
+    dft(complexImage, complexImage);
+
+    // realiza a troca de quadrantes
+    deslocaDFT(complexImage);
+
+    // aplica o filtro frequencial
+    mulSpectrums(complexImage,filter,complexImage,0);
+
+    // limpa o array de planos
+    planos.clear();
+    // separa as partes real e imaginaria para modifica-las
+    split(complexImage, planos);
+ 
+    // recompoe os planos em uma unica matriz complexa
+    merge(planos, complexImage);
+
+    // troca novamente os quadrantes
+    deslocaDFT(complexImage);
+
+	
+    // calcula a DFT inversa
+    idft(complexImage, complexImage);
+
+    // limpa o array de planos
+    planos.clear();
+
+    // separa as partes real e imaginaria da
+    // imagem filtrada
+    split(complexImage, planos);
+
+    // normaliza a parte real para exibicao
+    normalize(planos[0], planos[0], 0, 1, CV_MINMAX);
+    imshow("filtrada", planos[0]);
+    imshow("original", image);
+    imwrite("papa.jpg", image);
+    waitKey();
+  
+  return 0;
+}
+
+----
+
+== 7. Pointillism
+
+=== 7.1. Pointillism art
+
+The program below do the pointillism in a RGB image, again we can see Clint:
+
+.Clintao.jpg before pointillism
+image::Clintao.jpg[]
+
+Output:
+ 
+.Clintao.jpg after pointillism
+image::Clintp.jpg[]
+
+Code:
+
+[source, C++]
+----
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include <fstream>
+#include <iomanip>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <ctime>
+#include <cstdlib>
+
+using namespace std;
+using namespace cv;
+
+#define STEP 4
+#define JITTER 3
+#define RAIO 4
+
+int top_slider = 10;
+int top_slider_max = 200;
+
+Mat image, border, frame, points, tmp, result;
+
+void canny1(int, void *){
+  Canny(image, border, top_slider, 3 * top_slider);
+  imshow("canny", border);
+}
+
+  
+
+
+int main(int argc, char** argv){
+  vector<int> yrange;
+  vector<int> xrange;
+  int width, height;
+  int x, y;
+  int r, g, b;
+  
+  image= imread(argv[1]);
+
+  srand(time(0));
+  
+  if(!image.data){
+  cout << "nao abriu" << argv[1] << endl;
+    cout << argv[0] << " imagem.jpg";
+    exit(0);
+  }
+
+  width=image.size().width;
+  height=image.size().height;
+
+  xrange.resize(height/STEP);
+  yrange.resize(width/STEP);
+  
+  iota(xrange.begin(), xrange.end(), 0); 
+  iota(yrange.begin(), yrange.end(), 0);
+
+  for(uint i=0; i<xrange.size(); i++){
+    xrange[i]= xrange[i]*STEP+STEP/2;
+  }
+
+  for(uint i=0; i<yrange.size(); i++){
+    yrange[i]= yrange[i]*STEP+STEP/2;
+  }
+
+  points = Mat(height, width, CV_8UC3, Scalar(CV_RGB(255, 255, 255)));
+
+  random_shuffle(xrange.begin(), xrange.end());
+  
+  for(auto i : xrange){
+    random_shuffle(yrange.begin(), yrange.end());
+    for(auto j : yrange){
+      x = i+rand()%(2*JITTER)-JITTER+1;
+      y = j+rand()%(2*JITTER)-JITTER+1;
+      r = image.at<Vec3b>(x, y)[2];
+      g = image.at<Vec3b>(x, y)[1];
+      b = image.at<Vec3b>(x, y)[0];
+      circle(points, cv::Point(y, x), RAIO, CV_RGB(r, g, b), -1, CV_AA);
+    }
+  }
+ 
+  imshow("pontos", points);
+  imwrite(argv[2], points);
+  waitKey();
+
+  return 0;
+}
+----
+
+The program above basically goes through each pixel on image and draws a circle of radius 4 with same color and at the correspondent position, using a step of 4 (picks one pixel for each 4, in axis x and y).
+
+== 8. Vector quantization with K-means
+
+=== 8.1. The K-means process
+
+K-means is a quantization process that aims to sort N observations in K clusters. 
+
+In digital image processing, each observation corresponds to one pixel, and the clusters are the quantity of colors we want. We can sort each pixel from the aproximation with each centroid (one centroid for cluster), then, we take the mean distance of the samples in each cluster, crating new centroids positions. It's a iterative process, this process happens until we don't have more significative changes in centroids positions, finally, we can attribute one color for each cluster.
+
+Input:
+
+.Rampardos.jpg before K-means
+image::Rampardos.png[]
+
+We can see the code below:
+
+[source, C++]
+----
+#include <opencv2/opencv.hpp>
+#include <cstdlib>
+
+using namespace cv;
+
+int main( int argc, char** argv ){
+  int nClusters = 10;
+  Mat rotulos;
+  int nRodadas = 1;
+  int n = 2;
+  Mat centros;
+
+  if(argc!=12){
+  exit(0);
+  }
+  
+  Mat img = imread( argv[1], CV_LOAD_IMAGE_COLOR);
+  Mat samples(img.rows * img.cols, 3, CV_32F);
+for (int i = 0; i < 10; i++) {
+  for( int y = 0; y < img.rows; y++ ){
+    for( int x = 0; x < img.cols; x++ ){
+      for( int z = 0; z < 3; z++){
+        samples.at<float>(y + x*img.rows, z) = img.at<Vec3b>(y,x)[z];
+    }
+  }
+  }
+  
+  kmeans(samples,
+     nClusters,
+     rotulos,
+     TermCriteria(CV_TERMCRIT_ITER|CV_TERMCRIT_EPS, 10000, 0.0001),
+     nRodadas,
+     KMEANS_RANDOM_CENTERS,
+     centros );
+
+
+  Mat rotulada( img.size(), img.type() );
+  for( int y = 0; y < img.rows; y++ ){
+    for( int x = 0; x < img.cols; x++ ){ 
+    int indice = rotulos.at<int>(y + x*img.rows,0);
+    rotulada.at<Vec3b>(y,x)[0] = (uchar) centros.at<float>(indice, 0);
+    rotulada.at<Vec3b>(y,x)[1] = (uchar) centros.at<float>(indice, 1);
+    rotulada.at<Vec3b>(y,x)[2] = (uchar) centros.at<float>(indice, 2);
+  }
+  }
+  imshow( "clustered image", rotulada );
+  imwrite(argv[n], rotulada);
+  n++;
+  waitKey( 0 );
+  }
+}
+
+----
+
+In the program above, as requested by professor, we used the parameter KMEANS_RANDOM_CENTERS instead of KMEANS_PP_CENTERS, so, each Cluster initial position is randomized. It's important to say that as we have random initial positions, we have differents outputs each time, for 10 rounds, we have 10 differents outputs, as is shown below.
+
+Output:
+ 
+.Rampardos.jpg after K-means
+image::rampa.gif[]
+
+BONUS:
+
+.Ariana Grande
+image::Ariana.jpg[]
+
+.Ariana Grande gif
+image::Ariana.gif[]
+
 
 
 
