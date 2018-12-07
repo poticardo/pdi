@@ -479,6 +479,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_8_1_the_k_means_process">8.1. The K-means process</a></li>
 </ul>
 </li>
+<li><a href="#_9_case_study_prick_test">9. Case study - Prick Test</a>
+<ul class="sectlevel2">
+<li><a href="#_9_1_allergy">9.1 Allergy</a></li>
+<li><a href="#_9_2_prick_test">9.2 Prick test</a></li>
+<li><a href="#_9_3_the_process">9.3 The process</a></li>
+<li><a href="#_9_4_laboratory_visit">9.4 Laboratory visit</a></li>
+<li><a href="#_9_5_future_objectives">9.5 Future objectives</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -1875,10 +1884,108 @@ for (int i = 0; i &lt; 10; i++) {
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_9_case_study_prick_test">9. Case study - Prick Test</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_9_1_allergy">9.1 Allergy</h3>
+<div class="paragraph">
+<p>Allergy is every kind of reaction from the body to a substance considered strange. Things of our day-to-day life can cause allergy, we call these things allergens. Sneezing, coryza, itchiness, hives, unwell and even glottal edema, which can lead person to obit can be consequences of an allergic reaction.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_9_2_prick_test">9.2 Prick test</h3>
+<div class="paragraph">
+<p>Prick test is an "in vivo" method (which is done in the body) that aims to detect allergens which the patient is sensible. This test detects inhalants and food sensitivities.</p>
+</div>
+<div class="paragraph">
+<p>The test usually happens in the volar region of forearm or on in the back. A drop of negative control (usually saline, where is to happen absense of swelling) is dropped, also a drop of positive control (histamine), and drops of suspicious extracts, then, the punctures are aplyed. After waiting 15 minutes, the doctor can examine the size of the swell.</p>
+</div>
+<div class="paragraph">
+<p>The swelling is measured in milimeters and assigned with up to 4 levels of allergy, marked with crosses.</p>
+</div>
+<div class="paragraph">
+<p>The verification is done to the naked eye, with the aid of a ruler, here is where the digital images processing can aid. Nowadays this measurement is too subjective, some doctors don&#8217;t even use the ruler, and the help of softwere can make the detection more accurate and objective.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/puntura.png" alt="puntura">
+</div>
+<div class="title">Figure 32. Prick Test</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_9_3_the_process">9.3 The process</h3>
+<div class="paragraph">
+<p>Our initial idea is basically subtract the image of patient&#8217;s arm before and after prick test, so the doctor could evaluate the result, maybe with auxilium of a digital ruler. Buf first we would need to align both images, homography could be a good solution to alignment, which relates two coordinates of images in same surface by a homography matrix H. Below we can see the Homography process and the block diagram of the process.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/H.jpg" alt="H">
+</div>
+<div class="title">Figure 33. H matrix</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/homo.jpg" alt="homo">
+</div>
+<div class="title">Figure 34. Homography relation</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/processo2.jpg" alt="processo2">
+</div>
+<div class="title">Figure 35. Block diagram of homography</div>
+</div>
+<div class="paragraph">
+<p>We may face difficulties, because of ilumination and distance, so we will need a referance, and maybe a support to arm and camera.</p>
+</div>
+<div class="paragraph">
+<p>Below is the block diagram of the complete process.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/processo.jpg" alt="processo">
+</div>
+<div class="title">Figure 36. Block diagram</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_9_4_laboratory_visit">9.4 Laboratory visit</h3>
+<div class="paragraph">
+<p>We had a reunion with proffessor Valéria Soraya de Faria Sales at HUOL (Hospital Universitário Honófrio Lopes) where she gave us informations about the prick test. She made an example of a prick test in my arm, we can see it below.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/arm1.jpg" alt="arm1">
+</div>
+<div class="title">Figure 37. Arm before prick test</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/arm2.jpg" alt="arm2">
+</div>
+<div class="title">Figure 38. Arm after aplication of histamine</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="image/arm3.png" alt="arm3">
+</div>
+<div class="title">Figure 39. Arm after prick test</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_9_5_future_objectives">9.5 Future objectives</h3>
+<div class="paragraph">
+<p>We have the goal to implement the algorithm, and use this kind of process in others skin problems, like cancer or urticaria.</p>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2018-11-08 14:13:49 -03
+Last updated 2018-12-07 12:12:00 -03
 </div>
 </div>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">

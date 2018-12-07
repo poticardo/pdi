@@ -1196,6 +1196,63 @@ image::Ariana.jpg[]
 .Ariana Grande gif
 image::Ariana.gif[]
 
+== 9. Case study - Prick Test
+
+=== 9.1 Allergy
+
+Allergy is every kind of reaction from the body to a substance considered strange. Things of our day-to-day life can cause allergy, we call these things allergens. Sneezing, coryza, itchiness, hives, unwell and even glottal edema, which can lead person to obit can be consequences of an allergic reaction.
+
+=== 9.2 Prick test
+
+Prick test is an "in vivo" method (which is done in the body) that aims to detect allergens which the patient is sensible. This test detects inhalants and food sensitivities. 
+
+The test usually happens in the volar region of forearm or on in the back. A drop of negative control (usually saline, where is to happen absense of swelling) is dropped, also a drop of positive control (histamine), and drops of suspicious extracts, then, the punctures are aplyed. After waiting 15 minutes, the doctor can examine the size of the swell.
+
+The swelling is measured in milimeters and assigned with up to 4 levels of allergy, marked with crosses.
+
+The verification is done to the naked eye, with the aid of a ruler, here is where the digital images processing can aid. Nowadays this measurement is too subjective, some doctors don't even use the ruler, and the help of softwere can make the detection more accurate and objective.
+
+.Prick Test
+image::puntura.png[]
+
+=== 9.3 The process
+
+Our initial idea is basically subtract the image of patient's arm before and after prick test, so the doctor could evaluate the result, maybe with auxilium of a digital ruler. Buf first we would need to align both images, homography could be a good solution to alignment, which relates two coordinates of images in same surface by a homography matrix H. Below we can see the Homography process and the block diagram of the process.
+
+.H matrix
+image::H.jpg[]
+
+.Homography relation
+image::homo.jpg[]
+
+.Block diagram of homography
+image::processo2.jpg[]
+
+We may face difficulties, because of ilumination and distance, so we will need a referance, and maybe a support to arm and camera. 
+
+Below is the block diagram of the complete process.
+
+.Block diagram
+image::processo.jpg[]
+
+=== 9.4 Laboratory visit
+
+We had a reunion with proffessor Valéria Soraya de Faria Sales at HUOL (Hospital Universitário Honófrio Lopes) where she gave us informations about the prick test. She made an example of a prick test in my arm, we can see it below.
+
+.Arm before prick test
+image::arm1.jpg[]
+
+.Arm after aplication of histamine
+image::arm2.jpg[]
+
+.Arm after prick test
+image::arm3.png[]
+
+
+=== 9.5 Future objectives
+
+We have the goal to implement the algorithm, and use this kind of process in others skin problems, like cancer or urticaria.
+
 
 
 
